@@ -4,14 +4,19 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponseRedirect
 from django.shortcuts import get_object_or_404, render
-from django.db.models import Q
+from django.db.models import Q, Count
 
 from . import forms
 from . import models
 
 
 def course_list(request):
-    courses = models.Course.objects.filter(published=True)
+    courses = models.Course.objects.filter(
+        published=True
+    ).annotate(
+        total_steps=Count('text', distinct=True) + Count('quiz', distinct=True)
+    )
+
     return render(request, 'courses/course_list.html', {'courses': courses})
 
 
